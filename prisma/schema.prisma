@@ -20,6 +20,7 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  role      Role     @default(user)
 }
 
 model Post {
@@ -28,14 +29,9 @@ model Post {
   description String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  comments    Comment[]
 }
 
-model Comment {
-  id        String   @id @default(uuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+enum Role {
+  user  @map("user")
+  admin @map("admin")
 }

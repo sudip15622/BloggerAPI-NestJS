@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { PostInterface } from "interfaces/interfaces";
+import { PostInterface } from "./interfaces";
 import { PrismaService } from "src/prisma/prisma.service";
 // import { Post, Prisma } from "@prisma/client";
 // import { UUIDTypes } from "uuid";
