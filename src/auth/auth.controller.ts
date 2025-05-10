@@ -3,32 +3,44 @@ import {
     Body,
     Controller,
     Get,
-    HttpCode,
-    HttpStatus,
+    HttpException,
+    NotFoundException,
     Post,
     Request,
-    UseGuards
+    UseGuards,
+    UsePipes
 } from '@nestjs/common';
-import { AuthGuard } from './auth.guard';
+import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
-import { SignInDto } from './dto';
-import { UserInterface } from './interfaces';
-import { Public } from 'src/common/decorators/public.decorator';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { RequestInterface } from './interfaces/request.interface';
+import { ZodValidationPipe } from 'src/common/pipes/zod-valdation.pipe';
+import { LoginUserSchema, LoginUserType } from './schemas/login-user.schema';
 
 @Controller('auth')
 export class AuthController {
+
     constructor(private authService: AuthService) { }
 
-    @Public()
-    @HttpCode(HttpStatus.OK)
+    @UseGuards(LocalAuthGuard)
     @Post('login')
-    signIn(@Body() signInDto: SignInDto) {
-        return this.authService.signIn(signInDto.username, signInDto.password);
+    async login(@Request() req: RequestInterface) {
+        // console.log(_body);
+        return this.authService.login(req.user);
     }
 
-    // @UseGuards(AuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Get('profile')
-    getProfile(@Request() request): UserInterface {
-        return request.user;
+    getProfile(@Request() req: RequestInterface) {
+        return req.user;
     }
+
+
+    // @UseGuards(LocalAuthGuard)
+    // @Post('logout')
+    // async logout(@Request() req: RequestInterface) {
+    //     return req.logOut((err) => {
+    //         console.log(err);
+    //     });
+    // }
 }

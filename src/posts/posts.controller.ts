@@ -5,14 +5,14 @@ import { PostInterface } from "./interfaces";
 import { CreatePostDto, UpdatePostDto, FilterPostDto } from "./dto";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { Role } from "@prisma/client";
-import { RolesGuard } from "src/users/roles.guard";
+import { RoleBasedAuthGuard } from "src/users/roles.guard";
+import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 
 
 @Controller("posts")
 export class PostsController {
     constructor(private postsService: PostsService) { }
 
-    @Public()
     @Get()
     async findAllPosts(@Query() filters: FilterPostDto): Promise<PostInterface[]> {
         const definedFilters = Object.fromEntries(
@@ -21,25 +21,26 @@ export class PostsController {
         return this.postsService.findAllPosts(definedFilters);
     }
 
-    @Public()
     @Get(":id")
     async findPost(@Param("id") id: string) {
         return this.postsService.findPost(id);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post()
     async createPost(@Body() details: CreatePostDto): Promise<PostInterface> {
         return this.postsService.createPost(details);
     }
 
-    @Public()
+    @UseGuards(JwtAuthGuard)
     @Patch(":id")
     async updatePost(@Param("id") id: string, @Body() details: UpdatePostDto): Promise<PostInterface> {
         return this.postsService.updatePost(id, details);
     }
-    
-    @UseGuards(RolesGuard)
-    @Roles("admin")
+
+
+    @UseGuards(RoleBasedAuthGuard)
+    @Roles(Role.admin)
     @Delete(":id")
     async deletePost(@Param("id") id: string): Promise<PostInterface> {
         return this.postsService.deletePost(id);
