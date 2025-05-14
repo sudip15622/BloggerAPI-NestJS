@@ -1,8 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { PostInterface } from "./interfaces";
 import { PrismaService } from "src/prisma/prisma.service";
-// import { Post, Prisma } from "@prisma/client";
-// import { UUIDTypes } from "uuid";
+import { Post as PostModule, Prisma } from "@prisma/client";
 
 @Injectable()
 export class PostsService {
@@ -10,50 +8,49 @@ export class PostsService {
     constructor(private prisma: PrismaService) { }
 
 
-    async findAllPosts(filters?: Partial<PostInterface>): Promise<PostInterface[]> {
+    async findAllPosts(params: {
+        skip?: number,
+        take?: number,
+        cursor?: Prisma.PostWhereUniqueInput,
+        where?: Prisma.PostWhereInput,
+        orderBy?: Prisma.PostOrderByWithRelationInput
+    }): Promise<PostModule[]> {
+        const { skip, take, cursor, where, orderBy } = params;
         return await this.prisma.post.findMany({
-            where: filters? filters : {},
+            skip: skip,
+            take: take,
+            cursor: cursor,
+            where: where,
+            orderBy: orderBy
+        });
+    }
+
+    async findPost(uniqueInput: Prisma.PostWhereUniqueInput): Promise<PostModule | null> {
+        return await this.prisma.post.findUnique({
+            where: uniqueInput
         })
     }
 
-    async findPost(id: string): Promise<PostInterface | null> {
-        const post = await this.prisma.post.findUnique({
-            where: { id: id }
-        })
-        if (!post) {
-            throw new NotFoundException(`Cannot find post with id: ${id}`);
-        }
-        return post;
-    }
-
-    async createPost(data: Pick<PostInterface, "title" | "description">): Promise<PostInterface> {
+    async createPost(data: Prisma.PostCreateInput): Promise<PostModule> {
         return await this.prisma.post.create({
             data: data
         })
     }
 
-    async updatePost(id: string, data: Partial<Pick<PostInterface, "title" | "description">>): Promise<PostInterface> {
-        const post = await this.prisma.post.findUnique({
-            where: {id: id},
-        })
-        if (!post) {
-            throw new NotFoundException(`Cannot find post with id: ${id}`);
-        }
+    async updatePost(params: {
+        where: Prisma.PostWhereUniqueInput,
+        data: Omit<Prisma.PostUpdateInput, "id">
+    }): Promise<PostModule> {
+        const { where, data } = params;
         return await this.prisma.post.update({
-            where: {id: id},
-            data: {...data}
+            where: where,
+            data: data
         })
     }
 
-    async deletePost(id: string): Promise<PostInterface> {
-        const post = await this.prisma.post.findUnique({
-            where: {id: id}
-        });
-        if (!post) {
-            throw new NotFoundException(`Cannot find post with id: ${id}`);
-        }
+    async deletePost(uniqueInput: Prisma.PostWhereUniqueInput): Promise<PostModule> {
         return await this.prisma.post.delete({
-            where: {id: id}
+          where: uniqueInput
         })
-    }
+      }
 }

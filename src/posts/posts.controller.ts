@@ -1,48 +1,50 @@
-import { Controller, Get, Param, ParseIntPipe, Body, Post, Patch, Delete, Query, UseGuards } from "@nestjs/common";
-import { Public } from "src/common/decorators/public.decorator";
+import { Controller, Get, Param, ParseIntPipe, UsePipes, Body, Post, Patch, Delete, Query, UseGuards } from "@nestjs/common";
 import { PostsService } from "./posts.service";
-import { PostInterface } from "./interfaces";
-import { CreatePostDto, UpdatePostDto, FilterPostDto } from "./dto";
 import { Roles } from "src/common/decorators/roles.decorator";
-import { Role } from "@prisma/client";
+import { Post as PostModule, Role } from "@prisma/client";
 import { RoleBasedAuthGuard } from "src/users/roles.guard";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { ZodValidationPipe } from "src/common/pipes/zod-valdation.pipe";
+import { CreatePostSchema, CreatePostType, UpdatePostSchema, UpdatePostType, QueryPostSchema, QueryPostType } from "./schemas";
 
 
 @Controller("posts")
 export class PostsController {
     constructor(private postsService: PostsService) { }
 
+    @UsePipes(new ZodValidationPipe(QueryPostSchema))
     @Get()
-    async findAllPosts(@Query() filters: FilterPostDto): Promise<PostInterface[]> {
-        const definedFilters = Object.fromEntries(
-            Object.entries(filters).filter(([_, v]) => v !== undefined)
-        );
-        return this.postsService.findAllPosts(definedFilters);
+    async findAllPosts(
+        @Query() queries: QueryPostType
+    ): Promise<PostModule[]> {
+        return this.postsService.findAllPosts(queries);
     }
 
     @Get(":id")
-    async findPost(@Param("id") id: string) {
-        return this.postsService.findPost(id);
+    async findPost(@Param("id") id: string): Promise<PostModule | null> {
+        return this.postsService.findPost({ id: id })
     }
 
     @UseGuards(JwtAuthGuard)
+    @UsePipes(new ZodValidationPipe(CreatePostSchema))
     @Post()
-    async createPost(@Body() details: CreatePostDto): Promise<PostInterface> {
-        return this.postsService.createPost(details);
+    async createPost(@Body() data: CreatePostType): Promise<PostModule> {
+        return this.postsService.createPost(data);
     }
 
     @UseGuards(JwtAuthGuard)
+    @UsePipes(new ZodValidationPipe(UpdatePostSchema))
     @Patch(":id")
-    async updatePost(@Param("id") id: string, @Body() details: UpdatePostDto): Promise<PostInterface> {
-        return this.postsService.updatePost(id, details);
+    async updatePost(@Param("id") id: string, @Body() data: UpdatePostType): Promise<PostModule> {
+        return this.postsService.updatePost({
+            where: { id: id },
+            data: { ...data }
+        });
     }
 
-
-    @UseGuards(RoleBasedAuthGuard)
-    @Roles(Role.admin)
+    @UseGuards(JwtAuthGuard)
     @Delete(":id")
-    async deletePost(@Param("id") id: string): Promise<PostInterface> {
-        return this.postsService.deletePost(id);
+    async deletePost(@Param("id") id: string): Promise<PostModule> {
+        return this.postsService.deletePost({ id: id })
     }
 }
