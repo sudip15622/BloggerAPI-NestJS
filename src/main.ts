@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+// import { GraphQLSchemaHost } from '@nestjs/graphql';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,5 +11,6 @@ async function bootstrap() {
     forbidNonWhitelisted: true, // (optional) Throws an error if extra props are provided
   }));
   await app.listen(process.env.PORT ?? 3000);
+  // const { schema } = app.get(GraphQLSchemaHost);
 }
 bootstrap();

@@ -1,0 +1,22 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Author {
+  firstName: String
+  getAllBooksByAuthor: [Book!]!
+  id: Int!
+  lastName: String
+  posts: [Book!]!
+}
+
+type Book {
+  authorId: Int!
+  description: String
+  id: Int!
+  title: String!
+}
+
+type Query {
+  getAuthor(id: Int!): Author!
+}

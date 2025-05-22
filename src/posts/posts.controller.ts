@@ -1,11 +1,12 @@
-import { Controller, Get, Param, ParseIntPipe, UsePipes, Body, Post, Patch, Delete, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, UsePipes, Body, Post, Patch, Delete, Query, UseGuards, Req, Request } from "@nestjs/common";
 import { PostsService } from "./posts.service";
-import { Roles } from "src/common/decorators/roles.decorator";
-import { Post as PostModule, Role } from "@prisma/client";
-import { RoleBasedAuthGuard } from "src/users/roles.guard";
+import { Post as PostModule } from "@prisma/client";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { ZodValidationPipe } from "src/common/pipes/zod-valdation.pipe";
 import { CreatePostSchema, CreatePostType, UpdatePostSchema, UpdatePostType, QueryPostSchema, QueryPostType } from "./schemas";
+// import { RequestInterface } from "src/auth/interfaces/request.interface";
+import { RequestInterface, UserInterface } from "src/auth/interfaces";
+import { GetUser } from "src/common/decorators/user.decorator";
 
 
 @Controller("posts")
@@ -26,10 +27,13 @@ export class PostsController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @UsePipes(new ZodValidationPipe(CreatePostSchema))
     @Post()
-    async createPost(@Body() data: CreatePostType): Promise<PostModule> {
-        return this.postsService.createPost(data);
+    async createPost(
+        @GetUser() user: UserInterface,
+        @Body(new ZodValidationPipe(CreatePostSchema)) data: CreatePostType,
+    ): Promise<PostModule> {
+        // const user = {id: req.user.id}
+        return this.postsService.createPost(data, {id: user.id});
     }
 
     @UseGuards(JwtAuthGuard)

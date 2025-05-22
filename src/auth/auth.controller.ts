@@ -1,21 +1,15 @@
 
 import {
-    Body,
     Controller,
     Get,
-    HttpException,
-    NotFoundException,
     Post,
     Request,
     UseGuards,
-    UsePipes
 } from '@nestjs/common';
 import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { RequestInterface } from './interfaces/request.interface';
-import { ZodValidationPipe } from 'src/common/pipes/zod-valdation.pipe';
-import { LoginUserSchema, LoginUserType } from './schemas/login-user.schema';
+import { RequestInterface } from './interfaces';
 
 @Controller('auth')
 export class AuthController {
@@ -25,7 +19,6 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     @Post('login')
     async login(@Request() req: RequestInterface) {
-        // console.log(_body);
         return this.authService.login(req.user);
     }
 
@@ -34,13 +27,4 @@ export class AuthController {
     getProfile(@Request() req: RequestInterface) {
         return req.user;
     }
-
-
-    // @UseGuards(LocalAuthGuard)
-    // @Post('logout')
-    // async logout(@Request() req: RequestInterface) {
-    //     return req.logOut((err) => {
-    //         console.log(err);
-    //     });
-    // }
 }

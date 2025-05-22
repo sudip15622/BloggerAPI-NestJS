@@ -2,7 +2,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 
 
 
@@ -23,7 +23,10 @@ export class UsersService {
       take: take,
       cursor: cursor,
       where: where,
-      orderBy: orderBy
+      orderBy: orderBy,
+      include: {
+        posts: true,
+      }
     });
   }
 

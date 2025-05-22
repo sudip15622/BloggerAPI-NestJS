@@ -31,9 +31,14 @@ export class PostsService {
         })
     }
 
-    async createPost(data: Prisma.PostCreateInput): Promise<PostModule> {
+    async createPost(data: Prisma.PostCreateInput, user: Prisma.UserWhereUniqueInput): Promise<PostModule> {
         return await this.prisma.post.create({
-            data: data
+            data: {
+                ...data,
+                user: {
+                    connect: user
+                }
+            },
         })
     }
 
