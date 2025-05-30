@@ -40,3 +40,28 @@ enum Role {
   user  @map("user")
   admin @map("admin")
 }
+
+model Author {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  books     Book[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Book {
+  id       String    @id @default(uuid())
+  title    String
+  votes    Int       @default(0)
+  author   Author?   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String?
+  comments Comment[]
+}
+
+model Comment {
+  id          String  @id @default(uuid())
+  commentText String
+  book        Book?   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId      String?
+}

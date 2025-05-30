@@ -1,36 +1,24 @@
 import { Injectable } from "@nestjs/common";
+import { PrismaService } from "src/prisma/prisma.service";
+import { Prisma, Author as PrismaAuthor } from "@prisma/client";
 
 @Injectable()
 export class AuthorsService {
+    constructor (private prisma: PrismaService) {}
 
-    private authors = [
-        {
-            id: 1,
-            firstName: "Sudip",
-            lastName: "Lamichhane",
-            books: [
-                {
-                    id: 1,
-                    title: "Hello world",
-                    description: "This book is saying hello world."
-                }
-            ]
-        },
-        {
-            id: 2,
-            firstName: "Maddat",
-            lastName: "Subedi",
-            books: [
-                {
-                    id: 2,
-                    title: "Guithey Muji",
-                    description: "Hello everyone, this is guithey muji"
-                }
-            ]
-        }
-    ]
+    async getllAuthors (): Promise<PrismaAuthor[]> {
+        return await this.prisma.author.findMany();
+    }
 
-    async getAuthor(id:number): Promise<object| undefined> {
-        return this.authors.find(author => author.id === id)
+    async getAuthorById(uniqueInput: Prisma.AuthorWhereUniqueInput): Promise<PrismaAuthor | null> {
+        return await this.prisma.author.findUnique({
+            where: uniqueInput
+        })
+    }
+
+    async createAuthor(data: Prisma.AuthorCreateInput): Promise<PrismaAuthor> {
+        return await this.prisma.author.create({
+            data: data
+        })
     }
 }

@@ -18,12 +18,12 @@ export class PostsController {
     async findAllPosts(
         @Query() queries: QueryPostType
     ): Promise<PostModule[]> {
-        return this.postsService.findAllPosts(queries);
+        return await this.postsService.findAllPosts(queries);
     }
 
     @Get(":id")
     async findPost(@Param("id") id: string): Promise<PostModule | null> {
-        return this.postsService.findPost({ id: id })
+        return await this.postsService.findPost({ id: id })
     }
 
     @UseGuards(JwtAuthGuard)
@@ -33,14 +33,14 @@ export class PostsController {
         @Body(new ZodValidationPipe(CreatePostSchema)) data: CreatePostType,
     ): Promise<PostModule> {
         // const user = {id: req.user.id}
-        return this.postsService.createPost(data, {id: user.id});
+        return await this.postsService.createPost(data, {id: user.id});
     }
 
     @UseGuards(JwtAuthGuard)
     @UsePipes(new ZodValidationPipe(UpdatePostSchema))
     @Patch(":id")
     async updatePost(@Param("id") id: string, @Body() data: UpdatePostType): Promise<PostModule> {
-        return this.postsService.updatePost({
+        return await this.postsService.updatePost({
             where: { id: id },
             data: { ...data }
         });
@@ -49,6 +49,6 @@ export class PostsController {
     @UseGuards(JwtAuthGuard)
     @Delete(":id")
     async deletePost(@Param("id") id: string): Promise<PostModule> {
-        return this.postsService.deletePost({ id: id })
+        return await this.postsService.deletePost({ id: id })
     }
 }

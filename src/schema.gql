@@ -2,21 +2,65 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+directive @date(format: String = "yyyy-MM-dd") on FIELD_DEFINITION
+
 type Author {
-  firstName: String
-  getAllBooksByAuthor: [Book!]!
-  id: Int!
-  lastName: String
-  posts: [Book!]!
+  books: [Book]
+  createdAt: CustomDate!
+  email: CustomEmail!
+  id: String!
+  name: String!
+  updatedAt: CustomDate!
 }
 
 type Book {
-  authorId: Int!
-  description: String
-  id: Int!
+  author: Author
+  authorId: String
+  comments: [Comment!]!
+  id: String!
+  title: String!
+  votes: Int
+}
+
+type Comment {
+  bookId: String
+  commentText: String!
+  id: String!
+}
+
+input CreateAuthorInput {
+  email: CustomEmail!
+  name: String!
+}
+
+input CreateBookInput {
+  authorId: String
   title: String!
 }
 
+input CreateCommentInput {
+  bookId: String!
+  commentText: String!
+}
+
+"""Custom date scalar type (format: MMM dd, yyyy)"""
+scalar CustomDate
+
+"""Custom email scalar type (uses basic email format)"""
+scalar CustomEmail
+
+type Mutation {
+  addComment(input: CreateCommentInput!): Comment!
+  createAuthor(input: CreateAuthorInput!): Author!
+  createBook(input: CreateBookInput!): Book!
+}
+
 type Query {
-  getAuthor(id: Int!): Author!
+  getAllAuthors: [Author!]!
+  getAuthor(id: String!): Author
+  getBook(id: String!): Book
+}
+
+type Subscription {
+  commentAdded(bookId: String!): Comment!
 }
